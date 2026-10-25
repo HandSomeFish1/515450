@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""生成手机端单文件应用页（离线可用，可添加到主屏幕）"""
-import datetime as dt
+"""生成手机端单文件应用页（离线可用，支持手输股价试算）"""
 import json
+import os
 
 import daily_score as ds
 import trough
@@ -30,6 +30,12 @@ if score >= 75 and gap and gap > 3:
 
 series = [[r["date"], round(r["price"], 4), round(r["score"], 1)] for r in rows[-260:]]
 prev20 = rows[-21]["score"] if len(rows) > 21 else score
+
+win = rows[-750:]
+calc = {"p": [round(r["price"], 4) for r in win],
+        "s": [round(r["spread"], 4) for r in win],
+        "r": [round(r["raw"], 2) for r in win],
+        "p0": round(last["price"], 4), "s0": round(last["spread"], 4)}
 
 page = r"""<!DOCTYPE html>
 <html lang="zh-CN"><head>
@@ -76,6 +82,26 @@ page = r"""<!DOCTYPE html>
        font-size:.78rem}
   .row:last-child{border-bottom:none}
   .row .k{color:var(--muted)}
+  .btn{width:100%;margin-top:12px;background:#1d4ed8;border:none;color:#fff;border-radius:12px;
+       padding:12px;font-size:.9rem;font-family:inherit;font-weight:600}
+  .mask{position:fixed;inset:0;background:rgba(3,7,14,.75);display:none;align-items:center;
+        justify-content:center;padding:20px;z-index:50}
+  .mask.on{display:flex}
+  .modal{background:#111a2b;border:1px solid #2a3a58;border-radius:18px;padding:20px;width:100%;
+         max-width:340px}
+  .modal h3{margin:0 0 6px;font-size:1rem}
+  .modal p{margin:0 0 14px;color:var(--muted);font-size:.74rem;line-height:1.5}
+  .modal input{width:100%;background:#0d1522;border:1px solid #2a3a58;color:var(--ink);
+        border-radius:10px;padding:12px;font-size:1.1rem;text-align:center;font-family:inherit}
+  .modal .acts{display:flex;gap:10px;margin-top:14px}
+  .modal .acts button{flex:1;padding:11px;border-radius:10px;font-size:.85rem;font-family:inherit;
+        border:1px solid #2a3a58;background:#0d1522;color:#b8cbe4}
+  .modal .acts button.go{background:#1d4ed8;border-color:#3b82f6;color:#fff;font-weight:600}
+  .result{margin-top:12px;background:#0d1522;border:1px solid #2a3a58;border-radius:12px;padding:12px;
+          display:none}
+  .result.on{display:block}
+  .result .big{font-size:1.6rem;font-weight:800}
+  .result .line{color:var(--muted);font-size:.75rem;margin-top:4px;line-height:1.6}
 </style></head><body><div class="wrap">
 
 <h1>515450 红利低波 · 谷底分</h1>
@@ -92,6 +118,8 @@ page = r"""<!DOCTYPE html>
     <div class="m"><div class="k">三年位置</div><div class="v">__A__</div></div>
     <div class="m"><div class="k">利差位置</div><div class="v">__E__</div></div>
   </div>
+  <button class="btn" id="openCalc">手输股价试算</button>
+  <div class="result" id="result"></div>
 </div>
 
 <div class="card">
@@ -129,17 +157,32 @@ page = r"""<!DOCTYPE html>
   <div class="row"><span class="k">20 – 75</span><span>100 元</span></div>
   <div class="row"><span class="k">≥ 75</span><span>650 元</span></div>
   <div class="row"><span class="k">跌破 MA20 超 3%</span><span>每 1pp +880</span></div>
-  <div class="note">本页数据截至 __DATE__，离线可用。</div>
+  <div class="note">数据截至 __DATE__，离线可用。</div>
 </div>
 
 </div>
+
+<div class="mask" id="mask">
+  <div class="modal">
+    <h3>输入当前股价</h3>
+    <p>按这个价格重算今天的谷底分和该投多少。默认填最新收盘 __PRICE__。</p>
+    <input id="pxIn" type="number" step="0.001" inputmode="decimal" value="__PRICE__">
+    <div class="acts">
+      <button id="cancel">取消</button>
+      <button class="go" id="ok">计算</button>
+    </div>
+  </div>
+</div>
+
 <script>
 var DATA = __DATA__;
+var CALC = __CALC__;
 var BANDS = [[0,20,"#ef4444"],[20,40,"#f97316"],[40,60,"#94a3b8"],[60,80,"#4ade80"],[80,100,"#22c55e"]];
 var W=520,H=300,L=34,R=52,T=12,B=26;
 var view=[];
 
 function bandOf(v){ for(var i=0;i<BANDS.length;i++){ var hi=BANDS[i][1]; if(v<hi||(i===BANDS.length-1&&v<=hi)) return BANDS[i]; } return BANDS[4]; }
+function bandName(v){ return v<20?"顶部区":(v<40?"偏热":(v<60?"中性":(v<80?"偏冷":"谷底区"))); }
 function X(i,n){ return L + i*(W-L-R)/Math.max(1,n-1); }
 function Y(v){ return T + v/100*(H-T-B); }
 
@@ -184,7 +227,6 @@ function pick(clientX){
   var r=wrap.getBoundingClientRect(), sx=(clientX-r.left)/r.width*W;
   if(sx<L||sx>W-R){ tip.style.display="none"; return; }
   var i=Math.max(0,Math.min(d.length-1,Math.round((sx-L)/(W-L-R)*(d.length-1))));
-  var b=bandOf(d[i][2]);
   tip.style.display="block";
   tip.style.left=Math.min(84,Math.max(16,X(i,d.length)/W*100))+"%";
   tip.style.top=(Y(d[i][2])/H*100)+"%";
@@ -196,6 +238,52 @@ wrap.addEventListener("touchmove", function(e){ pick(e.touches[0].clientX); e.pr
 wrap.addEventListener("mouseleave", function(){ tip.style.display="none"; });
 wrap.addEventListener("touchend", function(){ setTimeout(function(){ tip.style.display="none"; }, 1800); });
 
+function calcScore(price){
+  var P=CALC.p, S=CALC.s, R=CALC.r, n=P.length;
+  var lo=0; for(var i=0;i<n;i++){ if(P[i]<=price) lo++; }
+  var A = 100*(1 - lo/(n+1));
+  var hi=0; for(var j=Math.max(0,n-250);j<n;j++){ if(P[j]>hi) hi=P[j]; }
+  var D = 100*Math.min(1, Math.abs(price/hi-1)/0.15);
+  var sp = CALC.s0 * (CALC.p0/price);
+  var c=0; for(var k=0;k<n;k++){ if(S[k]<=sp) c++; }
+  var E = 100*c/n;
+  var raw = 0.60*D + 0.25*A + 0.15*E;
+  var m=0; for(var q=0;q<n;q++){ if(R[q]<=raw) m++; }
+  var score = 100*m/n;
+  var ma20=0; for(var z=n-20;z<n;z++){ ma20 += P[z]; } ma20/=20;
+  var gap = (ma20/price-1)*100;
+  return {score:score, A:A, D:D, E:E, gap:gap, ma20:ma20};
+}
+
+function money(score, gap){
+  if(score<20) return 50;
+  if(score<75) return 100;
+  var a=650;
+  if(gap>3) a += (gap-3)*880;
+  return Math.round(a);
+}
+
+var mask=document.getElementById("mask"), res=document.getElementById("result");
+document.getElementById("openCalc").addEventListener("click", function(){
+  mask.classList.add("on");
+  document.getElementById("pxIn").focus();
+});
+document.getElementById("cancel").addEventListener("click", function(){ mask.classList.remove("on"); });
+mask.addEventListener("click", function(e){ if(e.target===mask) mask.classList.remove("on"); });
+document.getElementById("ok").addEventListener("click", function(){
+  var price = parseFloat(document.getElementById("pxIn").value);
+  if(!(price>0)){ return; }
+  var r = calcScore(price);
+  var s = r.score, b = bandOf(s), amt = money(s, r.gap);
+  res.innerHTML = "<div class='big' style='color:"+b[2]+"'>"+s.toFixed(0)+" 分 · "+bandName(s)+"</div>"+
+            "<div class='line'>该投 <b style='color:#38bdf8;font-size:1.05rem'>¥"+amt+"</b></div>"+
+            "<div class='line'>回撤深度 "+r.D.toFixed(0)+" · 三年位置 "+r.A.toFixed(0)+" · 利差 "+r.E.toFixed(0)+"</div>"+
+            "<div class='line'>MA20 约 "+r.ma20.toFixed(3)+"，偏离 "+(r.gap>0?"+":"")+r.gap.toFixed(1)+"%</div>"+
+            (amt>2000 ? "<div class='line' style='color:#f59e0b'>深跌加码，金额较大，注意现金流</div>" : "");
+  res.classList.add("on");
+  mask.classList.remove("on");
+});
+
 show(42);
 </script>
 </body></html>"""
@@ -205,6 +293,7 @@ if addon:
     formula = "650 + (%.1f − 3) × 880 = %d 元" % (gap, int(amt))
 
 html = (page.replace("__DATA__", json.dumps(series, ensure_ascii=False, separators=(",", ":")))
+            .replace("__CALC__", json.dumps(calc, ensure_ascii=False, separators=(",", ":")))
             .replace("__DATE__", last["date"])
             .replace("__PRICE__", "%.3f" % last["price"])
             .replace("__SCORE__", "%.0f" % score)
@@ -217,8 +306,7 @@ html = (page.replace("__DATA__", json.dumps(series, ensure_ascii=False, separato
             .replace("__AMT__", format(int(amt), ","))
             .replace("__FORMULA__", formula))
 open("mobile.html", "w", encoding="utf-8").write(html)
-import os
 os.makedirs("docs", exist_ok=True)
 open(os.path.join("docs", "index.html"), "w", encoding="utf-8").write(html)
-print("已生成 mobile.html（%d 天数据内嵌，%.0f KB）" % (len(series), len(html) / 1024))
+print("已生成 mobile.html + docs/index.html（%.0f KB）" % (len(html) / 1024))
 print("今日：谷底分 %.0f %s，投 %d 元" % (score, band_txt, amt))

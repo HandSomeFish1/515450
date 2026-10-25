@@ -78,7 +78,7 @@ def build(frames, window=750):
         D = 100 * min(1.0, abs(px[i] / hi250 - 1) / 0.15)
         hist = [s for s in spread[i - window + 1:i + 1] if s is not None]
         E = 100 * rank(hist, spread[i])
-        rows.append(dict(date=dates[i], price=px[i], A=A, D=D, E=E,
+        rows.append(dict(date=dates[i], price=px[i], A=A, D=D, E=E, spread=spread[i],
                          raw=0.60 * D + 0.25 * A + 0.15 * E))
 
     raws = [r["raw"] for r in rows]
