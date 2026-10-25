@@ -3,7 +3,7 @@ name: 更新谷底分数据
 on:
   workflow_dispatch:          # 手机上手动点一下就跑
   schedule:
-    - cron: "24 7 * * 1-5"    # 北京时间 15:24（周一至周五，收盘后）
+    - cron: "30 12 * * 1-5"   # 北京时间 20:30（基金净值公布后）
 
 permissions:
   contents: write
