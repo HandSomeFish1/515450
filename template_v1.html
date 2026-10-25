@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>515450 红利低波 · 综合温度计</title>
+<style>
+  :root{
+    --bg:#080d16; --card:#111a2b; --card2:#0d1522; --line:#22304a;
+    --text:#e7eef9; --muted:#8b9cb6; --accent:#38bdf8;
+    --buy:#22c55e; --cold:#4ade80; --neutral:#94a3b8; --warm:#f59e0b; --sell:#ef4444;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Roboto,sans-serif;
+    background:
+      radial-gradient(1100px 520px at 12% -8%, rgba(56,189,248,.16), transparent 60%),
+      radial-gradient(900px 480px at 100% 0%, rgba(34,197,94,.10), transparent 55%),
+      var(--bg);
+    color:var(--text); line-height:1.6; padding:28px 18px 48px;
+    font-variant-numeric:tabular-nums;
+  }
+  .wrap{max-width:900px;margin:0 auto}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+  h1{font-size:1.55rem;font-weight:750;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:.86rem;margin-top:6px}
+  .sub b{color:var(--text);font-weight:600}
+  .badge{
+    font-size:.74rem;color:#7dd3fc;border:1px solid rgba(56,189,248,.35);
+    background:rgba(56,189,248,.10);padding:5px 12px;border-radius:999px;white-space:nowrap;
+  }
+  .card{
+    background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0)) var(--card);
+    border:1px solid var(--line);border-radius:18px;padding:22px;
+    box-shadow:0 18px 40px -24px rgba(0,0,0,.9);
+  }
+  .hero{margin-bottom:18px}
+  .hero-top{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+  .score{font-size:4.4rem;font-weight:800;line-height:1;letter-spacing:-3px}
+  .score-cap{color:var(--muted);font-size:.82rem;margin-top:8px}
+  .score-cap span{opacity:.6}
+  .action-block{text-align:right;flex:1;min-width:240px}
+  .pill{
+    display:inline-block;padding:9px 20px;border-radius:999px;font-weight:700;
+    font-size:1.02rem;border:1px solid transparent;
+  }
+  .hint{color:var(--muted);font-size:.84rem;margin-top:10px;max-width:420px;margin-left:auto}
+  .delta{display:inline-block;margin-left:10px;font-size:.76rem;color:#7dd3fc;
+    border:1px solid rgba(56,189,248,.3);border-radius:999px;padding:2px 9px}
+  .bar{height:10px;border-radius:6px;background:#1b2740;margin-top:24px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:6px;transition:width .5s ease}
+  .bar-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:.72rem;margin-top:8px}
+  .card-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;gap:12px}
+  .card-head h2{font-size:1rem;font-weight:650;letter-spacing:.3px}
+  .muted{color:var(--muted)}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th{
+    text-align:left;font-weight:500;color:var(--muted);font-size:.74rem;
+    padding:0 10px 9px;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  td{padding:12px 10px;border-bottom:1px solid rgba(34,48,74,.55);vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  .num{text-align:right;white-space:nowrap}
+  .strong{font-weight:650}
+  .f-name{font-weight:600;font-size:.92rem}
+  .f-sub{color:var(--muted);font-size:.72rem;margin-top:1px}
+  .bar-cell{min-width:150px}
+  .mini{height:7px;border-radius:4px;background:#1b2740;overflow:hidden;margin-bottom:5px;min-width:90px}
+  .mini i{display:block;height:100%;border-radius:4px}
+  .mini-num{font-size:.72rem;color:var(--muted)}
+  .desc{font-size:.76rem}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin:18px 0}
+  .stat{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .stat .k{font-size:.72rem;color:var(--muted)}
+  .stat .v{font-size:1.16rem;font-weight:650;margin-top:3px;letter-spacing:.2px}
+  .stat .x{font-size:.68rem;color:#6b7d98;margin-top:3px}
+  .dca-top{display:flex;justify-content:space-between;gap:24px;align-items:center;flex-wrap:wrap}
+  .dca-amt{font-size:2.6rem;font-weight:800;letter-spacing:-1.5px;color:#4ade80;line-height:1.1}
+  .dca-formula{color:var(--muted);font-size:.8rem;margin-top:6px}
+  .dca-metrics{display:grid;grid-template-columns:repeat(4,auto);gap:10px 26px}
+  .dca-metrics .k{display:block;color:var(--muted);font-size:.68rem}
+  .dca-metrics b{font-size:.98rem;font-weight:650}
+  .dca-empty{color:var(--muted);font-size:.86rem;padding:8px 0}
+  .spark{width:100%;height:110px;display:block;margin:6px 0 2px}
+  .spark-meta{display:flex;gap:18px;color:var(--muted);font-size:.72rem;margin-bottom:12px}
+  .empty{color:var(--muted);font-size:.84rem;padding:18px 0}
+  .spark-one{padding:18px 0;color:var(--muted);font-size:.84rem}
+  .spark-one b{color:var(--accent);font-size:1rem}
+  .fold{margin-top:18px;padding:0;overflow:hidden}
+  .fold summary{
+    cursor:pointer;list-style:none;padding:18px 22px;font-weight:600;font-size:.95rem;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .fold summary::-webkit-details-marker{display:none}
+  .fold summary::after{content:"展开";color:var(--muted);font-size:.75rem;font-weight:400}
+  .fold[open] summary::after{content:"收起"}
+  .fold .body{padding:0 22px 22px;color:var(--muted);font-size:.84rem}
+  .fold .body h3{color:var(--text);font-size:.86rem;margin:14px 0 6px;font-weight:600}
+  .fold .body p{margin:4px 0}
+  .fold .body code{background:#0a1322;border:1px solid var(--line);border-radius:6px;
+    padding:1px 6px;font-size:.78rem;color:#a5c8ff}
+  .adjust{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;
+    padding:16px;background:var(--card2);border:1px dashed var(--line);border-radius:14px;margin-top:14px}
+  .adjust label{display:flex;flex-direction:column;gap:6px;font-size:.72rem;color:var(--muted)}
+  .adjust input{
+    background:#0a1322;border:1px solid var(--line);border-radius:8px;color:var(--text);
+    padding:8px 10px;font-size:.9rem;font-variant-numeric:tabular-nums;outline:none;
+  }
+  .adjust input:focus{border-color:var(--accent)}
+  .adjust-note{font-size:.72rem;color:#6b7d98;margin-top:8px}
+  footer{margin-top:22px;color:#61738f;font-size:.72rem;text-align:center;line-height:1.8}
+  @media (max-width:640px){
+    body{padding:18px 12px 36px}
+    .score{font-size:3.4rem}
+    .action-block{text-align:left}
+    .hint{margin-left:0}
+    .desc,.hide-sm{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>515450 红利低波 · 综合温度计</h1>
+      <p class="sub">__DATA_LINE__ · 自动生成于 __GEN__</p>
+    </div>
+    <span class="badge">手动运行 · 每次覆盖当日结果</span>
+  </header>
+
+  <section class="card hero">
+    <div class="hero-top">
+      <div>
+        <div class="score" id="score" style="color:__COLOR__">__SCORE__</div>
+        <div class="score-cap">谷底分 <span>/ 100</span>__DELTA__</div>
+      </div>
+      <div class="action-block">
+        <div class="pill" id="pill" style="color:__COLOR__;background:__BGC__;border-color:__COLOR__">__ACTION__</div>
+        <p class="hint" id="hint">__HINT__</p>
+      </div>
+    </div>
+    <div class="bar"><i id="fill" style="width:__SCORE__%;background:__COLOR__"></i></div>
+    <div class="bar-labels"><span>0 顶部</span><span>50 中性</span><span>100 谷底</span></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>谷底分拆解</h2>
+      <span class="muted" style="font-size:.76rem">折算分越高 ＝ 跌得越深</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>因子</th><th class="num">当前值</th><th>折算分 / 100</th>
+          <th class="num">权重</th><th class="desc">口径</th>
+        </tr>
+      </thead>
+      <tbody>
+__ROWS__
+      </tbody>
+    </table>
+  </section>
+
+  <section class="stats">
+    <div class="stat"><div class="k">指数股息率</div><div class="v">__DIV__%</div><div class="x">历史分位 __DIVPCT__%</div></div>
+    <div class="stat"><div class="k">10 年期国债</div><div class="v">__Y10__%</div><div class="x">截至 __Y10_DATE__</div></div>
+    <div class="stat"><div class="k">股息率 − 10Y</div><div class="v">__SPREAD__%</div><div class="x">利差分位 __SPREADPCT__（越低越便宜）</div></div>
+    <div class="stat"><div class="k">指数 PE</div><div class="v">__PE__</div><div class="x">历史分位 __PEPCT__%</div></div>
+    <div class="stat"><div class="k">RSI14</div><div class="v">__RSI__</div><div class="x">515450 日线</div></div>
+    <div class="stat"><div class="k">年线 BIAS</div><div class="v">__MA250_GAP__</div><div class="x">MA250 ＝ __MA250__</div></div>
+    <div class="stat"><div class="k">60 日动量</div><div class="v">__MOM60__</div><div class="x">沪深300 __MOM300__</div></div>
+    <div class="stat"><div class="k">相对强弱 60 日</div><div class="v">__RS60__</div><div class="x">情绪分 __ENV__ / 100</div></div>
+  </section>
+
+  <section class="card" style="margin-top:18px">
+    <div class="card-head">
+      <h2>今日定投</h2>
+      <span class="muted" style="font-size:.76rem">每个交易日一笔 · 100–500 元</span>
+    </div>
+    __DCA_BLOCK__
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>打分历史</h2>
+      <span class="muted" style="font-size:.76rem">最近 8 个交易日</span>
+    </div>
+    __SPARK__
+    <table>
+      <thead>
+        <tr><th>日期</th><th class="num">收盘</th><th class="num">利差分位</th>
+            <th class="num">RSI14</th><th class="num">股息率</th><th class="num">温度</th></tr>
+      </thead>
+      <tbody>
+__HIST__
+      </tbody>
+    </table>
+  </section>
+
+  <details class="card fold">
+    <summary>口径 · 数据来源 · 手动修正</summary>
+    <div class="body">
+      <h3>打分口径（与原始网页一致）</h3>
+      <p>综合分 ＝ 利差分位 × __W_SPREAD__% ＋ 股息率 × __W_DIV__% ＋ RSI14 × __W_RSI__% ＋ 年线 BIAS × __W_BIAS__% ＋ 市场情绪 × __W_ENV__%。</p>
+      <p>区间：__BANDS__</p>
+
+      <h3>数据来源</h3>
+      <p>· 行情 / RSI14 / 年线 BIAS / 60 日动量：腾讯证券日线（515450、沪深300）</p>
+      <p>· 股息率 / PE / PE 历史分位：蛋卷基金指数估值（__INDEX__）</p>
+      <p>· 中国 10 年期国债收益率：东方财富数据中心</p>
+
+      <h3>两个近似口径</h3>
+      <p>· <b>利差分位</b>：以「股息率 − 10 年国债收益率」的当前值，在近 __PERCENTILE_YEARS__ 年 __N__ 个周度样本中的排名换算（0% ＝ 利差历史最大 ＝ 最便宜）。历史股息率由「当前股息率 × 当前 PE ÷ 历史 PE」估算，假设派息率稳定。</p>
+      <p>· <b>市场情绪</b>：用 515450 相对沪深300 的 60 日超额收益映射为 0-100（红利被抽血 → 低分 → 买；红利狂欢 → 高分 → 卖），非资金流真实数据。</p>
+
+      <h3>手动修正（只影响本页预览，不写入历史）</h3>
+      <div class="adjust">
+        __INPUTS__
+      </div>
+      <p class="adjust-note">改动数值会即时重算温度分；刷新页面恢复自动结果。</p>
+
+      <h3>怎么用</h3>
+      <p>双击 <code>每日打分.cmd</code>：自动取数 → 生成报告 → 打开浏览器（桌面会同步一份 <code>515450温度计.html</code>）。</p>
+      <p>脚本：<code>daily_score.py</code>　配置：<code>config.json</code>（权重、阈值、桌面副本路径）。每次运行会把当日结果追加进 <code>history.csv</code>，历史走势据此绘制。</p>
+    </div>
+  </details>
+
+  <footer>
+    本页由脚本自动生成，仅作研究记录，不构成投资建议。<br>
+    数据可能存在延迟或口径差异，决策前请核对原始行情与基金公告。
+  </footer>
+</div>
+
+<script>
+(function () {
+  var W = __WEIGHTS_JS__;
+  var R = __RANGES_JS__;
+  var KEYS = [["spread", "spread_pct"], ["div", "div_yield"], ["rsi", "rsi"],
+              ["bias", "bias"], ["env", "env"]];
+  var scoreEl = document.getElementById("score");
+  var pillEl = document.getElementById("pill");
+  var hintEl = document.getElementById("hint");
+  var fillEl = document.getElementById("fill");
+
+  function band(t) {
+    if (t <= 20) return ["#22c55e", "rgba(34,197,94,.16)", "极佳买点：重仓 6 成以上", "利差与估值同时处于历史低位，安全垫最厚。"];
+    if (t <= 40) return ["#4ade80", "rgba(74,222,128,.16)", "偏冷：分批建仓 2-3 成", "估值偏便宜，可小步分批，留足后续加仓空间。"];
+    if (t <= 60) return ["#94a3b8", "rgba(148,163,184,.16)", "中性：持有观望，不买不卖", "性价比一般，等待更明确的信号再加仓或减仓。"];
+    if (t <= 80) return ["#f59e0b", "rgba(245,158,11,.16)", "偏热：警惕回调，分批止盈", "估值与情绪偏贵，逐步兑现浮盈，不追高。"];
+    return ["#ef4444", "rgba(239,68,68,.16)", "极度高估：适合清仓卖出", "历史高位区间，回撤风险显著大于上涨空间。"];
+  }
+  function lm(v, a, b) { return Math.min(Math.max((v - a) / (b - a), 0), 1); }
+
+  function recalc() {
+    var s = {};
+    KEYS.forEach(function (pair) {
+      var key = pair[0], rng = R[pair[1]];
+      var el = document.getElementById("in-" + key);
+      var v = parseFloat(el.value);
+      if (isNaN(v)) v = 0;
+      s[key] = lm(v, rng[0], rng[1]);
+    });
+    var total = Math.round(s.spread * W.spread + s.div * W.div + s.rsi * W.rsi +
+                           s.bias * W.bias + s.env * W.env);
+    var b = band(total);
+    scoreEl.textContent = total;
+    scoreEl.style.color = b[0];
+    pillEl.textContent = b[2];
+    pillEl.style.color = b[0];
+    pillEl.style.background = b[1];
+    pillEl.style.borderColor = b[0];
+    hintEl.textContent = b[3];
+    fillEl.style.width = total + "%";
+    fillEl.style.background = b[0];
+  }
+  KEYS.forEach(function (pair) {
+    document.getElementById("in-" + pair[0]).addEventListener("input", recalc);
+  });
+})();
+</script>
+</body>
+</html>

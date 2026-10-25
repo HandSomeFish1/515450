@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>515450 · __TITLE__</title>
+<style>
+  :root{
+    --bg:#080d16; --card:#111a2b; --card2:#0d1522; --line:#22304a;
+    --text:#e7eef9; --muted:#8b9cb6; --accent:#38bdf8;
+    --buy:#22c55e; --warm:#f59e0b; --sell:#ef4444;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Roboto,sans-serif;
+    background:
+      radial-gradient(1100px 520px at 10% -10%, rgba(56,189,248,.14), transparent 60%),
+      radial-gradient(900px 460px at 100% 0%, rgba(34,197,94,.10), transparent 55%),
+      var(--bg);
+    color:var(--text);line-height:1.65;padding:28px 18px 44px;
+    font-variant-numeric:tabular-nums;
+  }
+  .wrap{max-width:900px;margin:0 auto}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+       margin-bottom:18px;flex-wrap:wrap}
+  h1{font-size:1.45rem;font-weight:750}
+  .sub{color:var(--muted);font-size:.85rem;margin-top:6px}
+  .badge{font-size:.74rem;color:#7dd3fc;border:1px solid rgba(56,189,248,.35);
+         background:rgba(56,189,248,.10);padding:5px 12px;border-radius:999px;white-space:nowrap}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0)) var(--card);
+        border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px;
+        box-shadow:0 18px 40px -26px rgba(0,0,0,.9)}
+  .card-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:12px}
+  .card-head h2{font-size:.98rem;font-weight:650}
+  .muted{color:var(--muted)}
+  .legend-row{display:flex;gap:16px;flex-wrap:wrap;margin:2px 0 10px;
+              font-size:.76rem;color:var(--muted)}
+  .legend-row i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+  .chart{width:100%;display:block}
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th{text-align:left;font-weight:500;color:var(--muted);font-size:.72rem;
+     padding:0 10px 9px;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:10px;border-bottom:1px solid rgba(34,48,74,.55)}
+  tr:last-child td{border-bottom:none}
+  .num{text-align:right;white-space:nowrap}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:8px}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+  .m{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:13px 15px}
+  .m .k{font-size:.7rem;color:var(--muted)}
+  .m .v{font-size:1.15rem;font-weight:700;margin-top:2px}
+  .m .x{font-size:.66rem;color:#6b7d98;margin-top:2px}
+  .up{color:#4ade80} .down{color:#ef4444}
+  .note{background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.22);
+        border-radius:12px;padding:12px 15px;font-size:.81rem;color:#b8cbe4;margin-top:12px}
+  .note b{color:#7dd3fc}
+  footer{margin-top:6px;color:#61738f;font-size:.72rem;text-align:center;line-height:1.8}
+  @media (max-width:680px){ h1{font-size:1.2rem} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>515450 红利低波 · __TITLE__</h1>
+      <p class="sub">__SPAN__ · 共 __DAYS__ 个交易日 · 温度曲线按分数区间染色</p>
+    </div>
+    <span class="badge">分数越低越便宜</span>
+  </header>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>温度分走势</h2>
+      <span class="muted" style="font-size:.75rem">最低 __MIN__ · 最高 __MAX__ · 均值 __AVG__</span>
+    </div>
+    <div class="legend-row">
+      <span><i style="background:#ef4444"></i>0–20 顶部区</span>
+      <span><i style="background:#f97316"></i>20–40 偏热</span>
+      <span><i style="background:#94a3b8"></i>40–60 中性</span>
+      <span><i style="background:#4ade80"></i>60–80 偏冷</span>
+      <span><i style="background:#22c55e"></i>80–100 谷底区</span>
+    </div>
+    __CHART__
+    <div class="note">
+      线段颜色 = 当天谷底分所在区间；背景色带同色淡底。分数越高越接近谷底、越该买。
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>复权净值</h2>
+      <span class="muted" style="font-size:.75rem">__FIRSTPX__ → __LASTPX__（__YTD__）</span>
+    </div>
+    __PRICE__
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>每天建议金额（__LO__–__HI__ 元规则）</h2>
+      <span class="muted" style="font-size:.75rem">柱子颜色同样对应分数区间</span>
+    </div>
+    __AMT__
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>区间统计</h2></div>
+    <table>
+      <thead><tr><th>分数区间</th><th class="num">天数</th><th class="num">占比</th>
+        <th class="num">__FWD_COL__</th></tr></thead>
+      <tbody>__BANDS__</tbody>
+    </table>
+    <div class="note">
+      最后一列看的是「这个分数区间之后的表现」：区间够长时看接下来 __FWD__ 个交易日的平均涨跌，
+      区间太短（不足半年）时改看该区间内的平均日涨跌。<b>数值越高，说明这个分数越“值得买”</b>。
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>如果按规则日投</h2></div>
+    <div class="metrics">
+      <div class="m"><div class="k">累计投入</div><div class="v">¥__INV__</div><div class="x">__N_BUY__ 笔</div></div>
+      <div class="m"><div class="k">期末市值</div><div class="v">¥__VAL__</div><div class="x">收益 __PROFIT__ 元</div></div>
+      <div class="m"><div class="k">收益率</div><div class="v up">__RET__</div><div class="x">含 0.12% 申购费</div></div>
+      <div class="m"><div class="k">XIRR</div><div class="v">__XIRR__</div><div class="x">资金加权年化</div></div>
+      <div class="m"><div class="k">平均每笔</div><div class="v">¥__AVGAMT__</div><div class="x">__AVGHINT__</div></div>
+      <div class="m"><div class="k">同期净值</div><div class="v">__YTD__</div><div class="x">一次性买入对照</div></div>
+    </div>
+  </section>
+
+  <footer>
+    本页由脚本按「__TITLE__」逐日温度分自动生成，仅作复盘记录，不构成投资建议。
+  </footer>
+</div>
+</body>
+</html>

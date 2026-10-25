@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>515450 定投策略 · 成立以来回测</title>
+<style>
+  :root{
+    --bg:#080d16; --card:#111a2b; --card2:#0d1522; --line:#22304a;
+    --text:#e7eef9; --muted:#8b9cb6; --accent:#38bdf8;
+    --buy:#22c55e; --warm:#f59e0b; --sell:#ef4444;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Roboto,sans-serif;
+    background:
+      radial-gradient(1100px 520px at 10% -10%, rgba(56,189,248,.15), transparent 60%),
+      radial-gradient(900px 460px at 100% 0%, rgba(34,197,94,.10), transparent 55%),
+      var(--bg);
+    color:var(--text);line-height:1.65;padding:28px 18px 48px;
+    font-variant-numeric:tabular-nums;
+  }
+  .wrap{max-width:920px;margin:0 auto}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+       margin-bottom:18px;flex-wrap:wrap}
+  h1{font-size:1.5rem;font-weight:750}
+  .sub{color:var(--muted);font-size:.85rem;margin-top:6px}
+  .badge{font-size:.74rem;color:#7dd3fc;border:1px solid rgba(56,189,248,.35);
+         background:rgba(56,189,248,.10);padding:5px 12px;border-radius:999px;white-space:nowrap}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0)) var(--card);
+        border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:18px;
+        box-shadow:0 18px 40px -26px rgba(0,0,0,.9)}
+  .card-head{display:flex;justify-content:space-between;align-items:baseline;
+             margin-bottom:14px;gap:12px}
+  .card-head h2{font-size:1rem;font-weight:650}
+  .muted{color:var(--muted)}
+  .rule .desc{color:var(--muted);font-size:.85rem;margin-top:4px}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(152px,1fr));
+           gap:12px;margin-top:16px}
+  .m{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .m .k{font-size:.72rem;color:var(--muted)}
+  .m .v{font-size:1.26rem;font-weight:700;margin-top:2px}
+  .m .x{font-size:.68rem;color:#6b7d98;margin-top:2px}
+  .up{color:#4ade80} .down{color:#ef4444}
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th{text-align:left;font-weight:500;color:var(--muted);font-size:.72rem;
+     padding:0 10px 9px;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:11px 10px;border-bottom:1px solid rgba(34,48,74,.55);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .num{text-align:right;white-space:nowrap}
+  .strong{font-weight:650}
+  .sub2{color:var(--muted);font-size:.72rem;margin-top:2px}
+  .tag{font-size:.66rem;color:#22c55e;border:1px solid rgba(34,197,94,.5);
+       background:rgba(34,197,94,.12);border-radius:999px;padding:1px 7px;margin-left:6px}
+  .tag-warn{color:#f59e0b;border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.12)}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .chart{width:100%;height:250px;display:block;margin:4px 0 8px}
+  .legend{display:flex;gap:18px;color:var(--muted);font-size:.75rem;margin-bottom:10px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+  .note{background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.22);
+        border-radius:12px;padding:14px 16px;font-size:.82rem;color:#b8cbe4;margin-top:14px}
+  .note b{color:#7dd3fc}
+  .warnbox{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);
+           border-radius:12px;padding:14px 16px;font-size:.82rem;color:#e8cf9f;margin-top:14px}
+  .warnbox b{color:#fbbf24}
+  ul{margin:8px 0 0 18px;color:var(--muted);font-size:.83rem}
+  li{margin:4px 0}
+  footer{margin-top:8px;color:#61738f;font-size:.72rem;text-align:center;line-height:1.8}
+  @media (max-width:680px){
+    .cols{grid-template-columns:1fr}
+    h1{font-size:1.22rem}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>515450 定投策略实验室 · 成立以来回测</h1>
+      <p class="sub">每个交易日一笔 __LOAMT__–__HIAMT__ 元，金额由温度分决定 · 回测区间 __SPAN26__</p>
+    </div>
+    <span class="badge">__NRULES__ 条规则参选</span>
+  </header>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>相对最优：<span style="color:#7dd3fc">__RULE__</span></h2>
+      <span class="muted" style="font-size:.76rem">每个交易日</span>
+    </div>
+    <div class="rule">
+      <div class="desc">__RULE_DESC__；每笔限制在 __LOAMT__–__HIAMT__ 元，取整到 10 元。</div>
+    </div>
+    <div class="note">节奏：<b>每个交易日</b>买一笔。分数越低买得越多，分数越高买得越少（最低 __LOAMT__ 元，不会停买）。</div>
+    <div class="metrics">
+      <div class="m"><div class="k">全区间 XIRR</div><div class="v up">__Y26_XIRR__</div><div class="x">资金加权年化</div></div>
+      <div class="m"><div class="k">累计投入</div><div class="v">¥__INV__</div><div class="x">__N__ 笔 · 均 ¥__AVGAMT__</div></div>
+      <div class="m"><div class="k">期末市值</div><div class="v">¥__VAL__</div><div class="x">收益 __PROFIT__ 元（__RET__）</div></div>
+      <div class="m"><div class="k">平均成本</div><div class="v">__COST__</div><div class="x">最新复权净值 __LASTPX__</div></div>
+      <div class="m"><div class="k">最大浮亏</div><div class="v">__DD__</div><div class="x">持仓市值低于投入的最大幅度</div></div>
+      <div class="m"><div class="k">跑赢等额年数</div><div class="v">__WINY__</div><div class="x">按自然年拆分</div></div>
+    </div>
+  </section>
+
+  <section class="cols">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><h2>分数 → 每笔金额</h2></div>
+      <table>
+        <thead><tr><th>温度分</th><th class="num">当天投</th></tr></thead>
+        <tbody>__TBL__</tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><h2>全区间对照</h2></div>
+      <table>
+        <thead><tr><th>方案</th><th class="num">投入</th><th class="num">市值</th>
+          <th class="num">XIRR</th></tr></thead>
+        <tbody>
+          <tr><td><b>温度分日投</b></td><td class="num">¥__INV__</td>
+              <td class="num">¥__VAL__</td><td class="num up strong">__Y26_XIRR__</td></tr>
+          <tr><td>每天等额 __FLATAMT__</td><td class="num">¥__FLAT_INV__</td>
+              <td class="num">¥__FLAT_VAL__</td><td class="num">__FLAT_XIRR__</td></tr>
+          <tr><td>每天满额 __FULLAMT__</td><td class="num">¥__FULL_INV__</td>
+              <td class="num">¥__FULL_VAL__</td><td class="num">__FULL_XIRR__</td></tr>
+          <tr><td>期初一次性</td><td class="num">¥__INV__</td>
+              <td class="num">¥__LUMP_VAL__</td><td class="num">__LUMP_XIRR__</td></tr>
+        </tbody>
+      </table>
+      <div class="note">同期一次性买入只有 __LUMP_RET__，日投把同样的钱分批摊开，XIRR 反而更高。</div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:18px">
+    <div class="card-head">
+      <h2>分年表现（本策略 vs 每天等额 550）</h2>
+    </div>
+    <table>
+      <thead><tr><th>年份</th><th class="num">本策略 XIRR</th><th class="num">等额 XIRR</th>
+        <th class="num">差值</th><th class="num">笔数</th></tr></thead>
+      <tbody>__YEARROWS__</tbody>
+    </table>
+    <div class="note">__CHAMPNOTE__</div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>净值曲线与最近 12 笔</h2>
+      <span class="muted" style="font-size:.76rem">完整 __N__ 笔见 strategy_2026.csv</span>
+    </div>
+    <div class="legend">
+      <span><i style="background:#22c55e"></i>持仓市值</span>
+      <span><i style="background:#94a3b8"></i>累计投入</span>
+    </div>
+    __CHART__
+    <table>
+      <thead><tr><th>买入日</th><th class="num">温度分</th><th class="num">投入</th>
+        <th class="num">复权净值</th><th class="num">份额</th>
+        <th class="num">累计投入</th><th class="num">累计市值</th></tr></thead>
+      <tbody>__DETAIL__</tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>日投规则排行榜</h2>
+      <span class="muted" style="font-size:.76rem">按全区间 XIRR</span>
+    </div>
+    <table>
+      <thead><tr><th class="num">#</th><th>规则</th><th class="num">均投入</th>
+        <th class="num">全区间</th><th class="num">浮亏</th>
+        <th class="num">2022</th><th class="num">跑赢年数</th></tr></thead>
+      <tbody>__TOP__</tbody>
+    </table>
+    <div class="note">“2022” 是最难的一年（全年下跌），能在那年扛住的规则才值得长期用。</div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>稳不稳？两个检验</h2></div>
+    <p class="muted" style="font-size:.84rem">1）换锚点后是否塌方</p>
+    <table style="margin-top:8px">
+      <thead><tr><th>同类规则</th><th class="num">全区间 XIRR</th>
+        <th class="num">均投入</th><th class="num">2022 XIRR</th></tr></thead>
+      <tbody>__SENS__</tbody>
+    </table>
+    <div class="warnbox">
+      <b>必须知道的局限：</b>
+      <ul>
+        <li>日投意味着持续投入：全区间累计 ¥__INV__，平均每年约 ¥__YEARLY__（均 ¥__AVGAMT__/天），先确认现金流撑得住。</li>
+        <li>已按每笔 <b>__FEE__</b> 申购费（外扣法）计入成本；实际还有卖出佣金与跟踪误差未计。</li>
+        <li>回测用<b>基金复权净值</b>（分红按除权日再投资），不是场内成交价；实际按 ETF 价格买入会有小幅溢价折价差异。</li>
+        <li>2021–2022 是下跌段、2024 是快涨段，规则在这两段的表现差异很大，见上面的分年表。</li>
+        <li>温度分里的股息率、PE 分位由蛋卷周度估值插值估算，利差分位用近 10 年样本排名，存在口径误差。</li>
+        <li>回测未计佣金、冲击成本与跟踪误差；规则只决定「今天投多少」，不预测涨跌。</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    策略回测由脚本自动生成，仅作研究记录，不构成投资建议。<br>
+    数据：天天基金净值（515450 成立以来）· 腾讯证券沪深300 · 蛋卷估值 · 东方财富国债收益率
+  </footer>
+</div>
+</body>
+</html>

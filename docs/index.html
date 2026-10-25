@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#080d16">
+<title>515450 谷底分</title>
+<style>
+  :root{--bg:#080d16;--card:#111a2b;--line:#22304a;--ink:#e7eef9;--muted:#8b9cb6;--dim:#5b6b85;--accent:#38bdf8}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;padding:16px 12px 40px;background:var(--bg);color:var(--ink);
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Roboto,sans-serif;
+       font-variant-numeric:tabular-nums}
+  .wrap{max-width:560px;margin:0 auto}
+  h1{font-size:1.05rem;margin:0 0 2px;font-weight:700}
+  .sub{color:var(--muted);font-size:.74rem;margin-bottom:14px}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0)) var(--card);
+        border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+  .top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .score{font-size:3.2rem;font-weight:800;line-height:1}
+  .pill{font-size:.78rem;padding:4px 12px;border-radius:999px;border:1px solid}
+  .cap{color:var(--muted);font-size:.72rem;margin-top:6px}
+  .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+  .m{background:#0d1522;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+  .m .k{font-size:.62rem;color:var(--muted)}
+  .m .v{font-size:.92rem;font-weight:650;margin-top:2px}
+  .amt{font-size:2.2rem;font-weight:800;color:var(--accent);line-height:1}
+  .formula{color:var(--muted);font-size:.76rem;margin-top:6px;line-height:1.5}
+  .btns{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px}
+  .btns button{flex:0 0 auto;background:#0d1522;border:1px solid #2a3a58;color:#b8cbe4;
+       border-radius:999px;padding:6px 14px;font-size:.74rem;font-family:inherit}
+  .btns button.on{background:#1d4ed8;border-color:#3b82f6;color:#fff}
+  .chartwrap{position:relative}
+  .chart{width:100%;height:auto;display:block}
+  .tip{position:absolute;display:none;pointer-events:none;background:#0b1424;border:1px solid var(--accent);
+       border-radius:8px;padding:6px 9px;font-size:.72rem;line-height:1.45;color:var(--ink);
+       transform:translate(-50%,-115%);white-space:nowrap;z-index:5}
+  .tip b{color:#7dd3fc}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;font-size:.68rem;color:var(--muted);margin-bottom:6px}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px}
+  .note{color:var(--dim);font-size:.7rem;line-height:1.65;margin-top:8px}
+  .row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(34,48,74,.5);
+       font-size:.78rem}
+  .row:last-child{border-bottom:none}
+  .row .k{color:var(--muted)}
+</style></head><body><div class="wrap">
+
+<h1>515450 红利低波 · 谷底分</h1>
+<div class="sub">2026-10-23 · 收盘 1.426</div>
+
+<div class="card">
+  <div class="top">
+    <span class="score" style="color:#94a3b8">40</span>
+    <span class="pill" style="color:#94a3b8;border-color:#94a3b8">中性</span>
+  </div>
+  <div class="cap">谷底分 / 100 · 20 个交易日前 78</div>
+  <div class="metrics">
+    <div class="m"><div class="k">回撤深度</div><div class="v">18</div></div>
+    <div class="m"><div class="k">三年位置</div><div class="v">3</div></div>
+    <div class="m"><div class="k">利差位置</div><div class="v">6</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div style="color:var(--muted);font-size:.72rem;margin-bottom:6px">今日定投</div>
+  <div class="amt">¥100</div>
+  <div class="formula">谷底分 40 → 中性，投 100 元</div>
+</div>
+
+<div class="card">
+  <div class="btns" id="btns">
+    <button data-n="21">1月</button>
+    <button data-n="42" class="on">2月</button>
+    <button data-n="63">3月</button>
+    <button data-n="126">半年</button>
+    <button data-n="250">1年</button>
+    <button data-n="0">全部</button>
+  </div>
+  <div class="legend">
+    <span><i style="background:#ef4444"></i>顶部</span>
+    <span><i style="background:#f97316"></i>偏热</span>
+    <span><i style="background:#94a3b8"></i>中性</span>
+    <span><i style="background:#4ade80"></i>偏冷</span>
+    <span><i style="background:#22c55e"></i>谷底</span>
+  </div>
+  <div class="chartwrap" id="cwrap">
+    <div id="chart"></div>
+    <div class="tip" id="tip"></div>
+  </div>
+  <div class="note">点一下曲线看当天数值；纵轴越往下越接近谷底。</div>
+</div>
+
+<div class="card">
+  <div style="color:var(--muted);font-size:.72rem;margin-bottom:6px">规则</div>
+  <div class="row"><span class="k">谷底分 &lt; 20</span><span>50 元</span></div>
+  <div class="row"><span class="k">20 – 75</span><span>100 元</span></div>
+  <div class="row"><span class="k">≥ 75</span><span>650 元</span></div>
+  <div class="row"><span class="k">跌破 MA20 超 3%</span><span>每 1pp +880</span></div>
+  <div class="note">本页数据截至 2026-10-23，离线可用。</div>
+</div>
+
+</div>
+<script>
+var DATA = [["2025-09-22",1.3267,86.9],["2025-09-23",1.3334,84.6],["2025-09-24",1.3399,81.7],["2025-09-25",1.3394,81.9],["2025-09-26",1.3431,80.2],["2025-09-29",1.342,80.7],["2025-09-30",1.3345,84.4],["2025-10-09",1.3483,76.9],["2025-10-10",1.3623,63.1],["2025-10-13",1.3556,69.4],["2025-10-14",1.371,53.7],["2025-10-15",1.3757,47.7],["2025-10-16",1.3839,36.1],["2025-10-17",1.3779,45.2],["2025-10-20",1.3812,36.0],["2025-10-21",1.3808,36.9],["2025-10-22",1.3887,27.8],["2025-10-23",1.3953,22.7],["2025-10-24",1.3909,26.2],["2025-10-27",1.3991,18.6],["2025-10-28",1.3907,26.4],["2025-10-29",1.3868,30.1],["2025-10-30",1.3958,22.6],["2025-10-31",1.389,28.3],["2025-11-03",1.4033,15.0],["2025-11-04",1.407,12.2],["2025-11-05",1.4045,14.3],["2025-11-06",1.4147,4.7],["2025-11-07",1.4138,5.3],["2025-11-10",1.4287,1.4],["2025-11-11",1.4239,5.4],["2025-11-12",1.4301,1.7],["2025-11-13",1.4283,4.0],["2025-11-14",1.422,8.9],["2025-11-17",1.4125,18.0],["2025-11-18",1.4052,24.4],["2025-11-19",1.4134,17.2],["2025-11-20",1.4155,15.2],["2025-11-21",1.3991,30.1],["2025-11-24",1.3916,39.8],["2025-11-25",1.3963,33.8],["2025-11-26",1.3925,39.1],["2025-11-27",1.3981,31.5],["2025-11-28",1.3947,36.4],["2025-12-01",1.4018,27.4],["2025-12-02",1.4035,25.7],["2025-12-03",1.4038,25.7],["2025-12-04",1.3976,32.7],["2025-12-05",1.3969,34.6],["2025-12-08",1.3884,50.1],["2025-12-09",1.3778,61.3],["2025-12-10",1.375,63.6],["2025-12-11",1.3702,68.9],["2025-12-12",1.3684,70.6],["2025-12-15",1.3689,70.0],["2025-12-16",1.3652,73.0],["2025-12-17",1.3695,69.2],["2025-12-18",1.3808,58.7],["2025-12-19",1.3802,59.2],["2025-12-22",1.3755,63.0],["2025-12-23",1.377,61.8],["2025-12-24",1.3764,62.0],["2025-12-25",1.3787,60.2],["2025-12-26",1.3757,63.5],["2025-12-29",1.3738,64.4],["2025-12-30",1.3706,67.8],["2025-12-31",1.3756,62.2],["2026-01-05",1.375,63.1],["2026-01-06",1.3845,50.4],["2026-01-07",1.3868,49.1],["2026-01-08",1.3827,54.1],["2026-01-09",1.3898,44.5],["2026-01-12",1.389,49.4],["2026-01-13",1.388,50.5],["2026-01-14",1.3784,61.7],["2026-01-15",1.3703,71.5],["2026-01-16",1.3646,78.3],["2026-01-19",1.3675,78.6],["2026-01-20",1.39,51.6],["2026-01-21",1.3768,67.9],["2026-01-22",1.379,65.1],["2026-01-23",1.375,70.2],["2026-01-26",1.3781,67.5],["2026-01-27",1.3668,80.0],["2026-01-28",1.3784,67.0],["2026-01-29",1.4009,36.4],["2026-01-30",1.3835,61.0],["2026-02-02",1.3651,81.4],["2026-02-03",1.3658,81.1],["2026-02-04",1.3886,54.6],["2026-02-05",1.3966,41.5],["2026-02-06",1.3925,49.1],["2026-02-09",1.4014,33.2],["2026-02-10",1.4019,32.9],["2026-02-11",1.4054,28.5],["2026-02-12",1.3955,43.6],["2026-02-13",1.3841,59.8],["2026-02-24",1.3899,53.9],["2026-02-25",1.3869,57.8],["2026-02-26",1.3863,58.0],["2026-02-27",1.3916,51.3],["2026-03-02",1.4051,29.7],["2026-03-03",1.4092,24.4],["2026-03-04",1.3948,46.2],["2026-03-05",1.3981,39.6],["2026-03-06",1.4069,27.3],["2026-03-09",1.4047,26.0],["2026-03-10",1.4034,27.7],["2026-03-11",1.4227,10.5],["2026-03-12",1.4305,4.1],["2026-03-13",1.4327,4.1],["2026-03-16",1.4327,3.9],["2026-03-17",1.4362,4.0],["2026-03-18",1.431,8.9],["2026-03-19",1.4269,13.2],["2026-03-20",1.4182,20.5],["2026-03-23",1.3762,75.1],["2026-03-24",1.3993,44.2],["2026-03-25",1.4105,28.7],["2026-03-26",1.4114,27.6],["2026-03-27",1.4092,30.8],["2026-03-30",1.4104,25.4],["2026-03-31",1.4099,26.4],["2026-04-01",1.4125,23.5],["2026-04-02",1.4183,19.6],["2026-04-03",1.4007,40.1],["2026-04-07",1.3934,52.6],["2026-04-08",1.4056,34.1],["2026-04-09",1.393,53.2],["2026-04-10",1.3913,57.4],["2026-04-13",1.3856,67.2],["2026-04-14",1.3909,60.4],["2026-04-15",1.3993,47.2],["2026-04-16",1.4004,45.4],["2026-04-17",1.3939,57.3],["2026-04-20",1.3974,46.1],["2026-04-21",1.4106,27.1],["2026-04-22",1.4038,37.5],["2026-04-23",1.4126,24.4],["2026-04-24",1.4131,23.9],["2026-04-27",1.406,33.2],["2026-04-28",1.4176,20.8],["2026-04-29",1.4199,20.4],["2026-04-30",1.4145,23.9],["2026-05-06",1.4094,31.7],["2026-05-07",1.404,40.0],["2026-05-08",1.4036,41.2],["2026-05-11",1.4108,32.8],["2026-05-12",1.4111,32.4],["2026-05-13",1.406,39.6],["2026-05-14",1.4045,42.7],["2026-05-15",1.3998,50.8],["2026-05-18",1.3958,58.4],["2026-05-19",1.4128,31.5],["2026-05-20",1.3952,60.0],["2026-05-21",1.3867,71.1],["2026-05-22",1.3809,76.8],["2026-05-25",1.3841,76.3],["2026-05-26",1.3874,73.2],["2026-05-27",1.3854,76.0],["2026-05-28",1.3767,83.7],["2026-05-29",1.4045,50.1],["2026-06-01",1.4219,23.6],["2026-06-02",1.4178,28.1],["2026-06-03",1.406,43.5],["2026-06-04",1.3898,70.0],["2026-06-05",1.3901,68.4],["2026-06-08",1.3849,72.7],["2026-06-09",1.3875,69.2],["2026-06-10",1.3973,54.1],["2026-06-11",1.3947,58.9],["2026-06-12",1.407,37.1],["2026-06-15",1.3896,69.2],["2026-06-16",1.3716,85.7],["2026-06-17",1.3626,89.2],["2026-06-18",1.3281,97.3],["2026-06-22",1.3385,96.4],["2026-06-23",1.3395,96.3],["2026-06-24",1.3187,99.1],["2026-06-25",1.3095,99.9],["2026-06-26",1.2973,100.0],["2026-06-29",1.3118,99.6],["2026-06-30",1.2874,100.0],["2026-07-01",1.3051,99.7],["2026-07-02",1.3206,98.0],["2026-07-03",1.3237,97.9],["2026-07-06",1.3428,94.9],["2026-07-07",1.3327,96.4],["2026-07-08",1.3463,94.3],["2026-07-09",1.3341,96.1],["2026-07-10",1.3392,95.5],["2026-07-13",1.3537,91.6],["2026-07-14",1.3677,87.3],["2026-07-15",1.3791,83.6],["2026-07-16",1.3714,86.8],["2026-07-17",1.3793,83.3],["2026-07-20",1.4181,23.6],["2026-07-21",1.403,46.9],["2026-07-22",1.4097,35.9],["2026-07-23",1.4135,30.4],["2026-07-24",1.4028,49.6],["2026-07-27",1.4033,49.6],["2026-07-28",1.416,28.3],["2026-07-29",1.4292,16.5],["2026-07-30",1.4536,10.8],["2026-07-31",1.4369,23.2],["2026-08-03",1.4379,19.7],["2026-08-04",1.4055,60.0],["2026-08-05",1.3896,80.7],["2026-08-06",1.3894,80.8],["2026-08-07",1.3803,85.6],["2026-08-10",1.3906,84.1],["2026-08-11",1.3881,84.9],["2026-08-12",1.3837,87.1],["2026-08-13",1.3844,86.8],["2026-08-14",1.3773,88.5],["2026-08-17",1.3726,90.0],["2026-08-18",1.3762,88.8],["2026-08-19",1.3897,84.0],["2026-08-20",1.3949,81.2],["2026-08-21",1.3803,87.3],["2026-08-24",1.3947,75.9],["2026-08-25",1.3965,73.7],["2026-08-26",1.4025,66.3],["2026-08-27",1.3892,81.1],["2026-08-28",1.3901,80.5],["2026-08-31",1.3952,73.6],["2026-09-01",1.4094,54.4],["2026-09-02",1.4047,61.1],["2026-09-03",1.4041,62.5],["2026-09-04",1.4126,49.6],["2026-09-07",1.3984,73.1],["2026-09-08",1.399,72.1],["2026-09-09",1.4021,68.1],["2026-09-10",1.4081,60.1],["2026-09-11",1.4027,67.3],["2026-09-14",1.4109,49.6],["2026-09-15",1.4028,63.2],["2026-09-16",1.3939,75.3],["2026-09-17",1.3919,78.1],["2026-09-18",1.3887,81.7],["2026-09-21",1.3889,83.3],["2026-09-22",1.3895,83.1],["2026-09-23",1.3874,84.0],["2026-09-24",1.3902,82.0],["2026-09-28",1.3931,78.8],["2026-09-29",1.3944,78.0],["2026-09-30",1.4094,57.2],["2026-10-08",1.4253,27.2],["2026-10-09",1.4242,29.6],["2026-10-12",1.4438,14.1],["2026-10-13",1.4398,13.9],["2026-10-14",1.4535,2.7],["2026-10-15",1.4489,6.0],["2026-10-16",1.4516,4.7],["2026-10-19",1.4643,1.2],["2026-10-20",1.4536,11.3],["2026-10-21",1.4338,27.7],["2026-10-22",1.4306,31.6],["2026-10-23",1.4258,40.0]];
+var BANDS = [[0,20,"#ef4444"],[20,40,"#f97316"],[40,60,"#94a3b8"],[60,80,"#4ade80"],[80,100,"#22c55e"]];
+var W=520,H=300,L=34,R=52,T=12,B=26;
+var view=[];
+
+function bandOf(v){ for(var i=0;i<BANDS.length;i++){ var hi=BANDS[i][1]; if(v<hi||(i===BANDS.length-1&&v<=hi)) return BANDS[i]; } return BANDS[4]; }
+function X(i,n){ return L + i*(W-L-R)/Math.max(1,n-1); }
+function Y(v){ return T + v/100*(H-T-B); }
+
+function draw(d){
+  view=d;
+  var n=d.length, s='<svg viewBox="0 0 '+W+' '+H+'" class="chart">';
+  BANDS.forEach(function(b){
+    var y1=Y(b[0]), y2=Y(b[1]);
+    s+='<rect x="'+L+'" y="'+y1+'" width="'+(W-L-R)+'" height="'+(y2-y1)+'" fill="'+b[2]+'" opacity=".08"/>';
+  });
+  for(var v=0;v<=100;v+=20){
+    s+='<line x1="'+L+'" y1="'+Y(v)+'" x2="'+(W-R)+'" y2="'+Y(v)+'" stroke="#22304a"/>';
+    s+='<text x="'+(L-6)+'" y="'+(Y(v)+3)+'" fill="#5b6b85" font-size="8" text-anchor="end">'+v+'</text>';
+  }
+  for(var i=1;i<n;i++){
+    var c=bandOf((d[i-1][2]+d[i][2])/2)[2];
+    s+='<line x1="'+X(i-1,n).toFixed(1)+'" y1="'+Y(d[i-1][2]).toFixed(1)+'" x2="'+X(i,n).toFixed(1)+
+       '" y2="'+Y(d[i][2]).toFixed(1)+'" stroke="'+c+'" stroke-width="2"/>';
+  }
+  var step=Math.max(1,Math.floor(n/4));
+  for(var j=0;j<n;j+=step){
+    s+='<text x="'+X(j,n).toFixed(1)+'" y="'+(H-8)+'" fill="#5b6b85" font-size="8" text-anchor="middle">'+d[j][0].slice(5)+'</text>';
+  }
+  document.getElementById("chart").innerHTML=s+"</svg>";
+}
+
+function show(n){
+  var sub = n ? DATA.slice(Math.max(0,DATA.length-n)) : DATA.slice();
+  draw(sub);
+}
+
+document.getElementById("btns").addEventListener("click", function(e){
+  var t=e.target; if(t.tagName!=="BUTTON") return;
+  Array.prototype.forEach.call(this.children, function(b){ b.classList.remove("on"); });
+  t.classList.add("on");
+  show(parseInt(t.getAttribute("data-n"),10));
+});
+
+var wrap=document.getElementById("cwrap"), tip=document.getElementById("tip");
+function pick(clientX){
+  var d=view; if(!d||d.length<2) return;
+  var r=wrap.getBoundingClientRect(), sx=(clientX-r.left)/r.width*W;
+  if(sx<L||sx>W-R){ tip.style.display="none"; return; }
+  var i=Math.max(0,Math.min(d.length-1,Math.round((sx-L)/(W-L-R)*(d.length-1))));
+  var b=bandOf(d[i][2]);
+  tip.style.display="block";
+  tip.style.left=Math.min(84,Math.max(16,X(i,d.length)/W*100))+"%";
+  tip.style.top=(Y(d[i][2])/H*100)+"%";
+  tip.innerHTML="<b>"+d[i][0]+"</b><br>谷底分 "+d[i][2].toFixed(0)+"<br>净值 "+d[i][1].toFixed(3);
+}
+wrap.addEventListener("mousemove", function(e){ pick(e.clientX); });
+wrap.addEventListener("touchstart", function(e){ pick(e.touches[0].clientX); });
+wrap.addEventListener("touchmove", function(e){ pick(e.touches[0].clientX); e.preventDefault(); }, {passive:false});
+wrap.addEventListener("mouseleave", function(){ tip.style.display="none"; });
+wrap.addEventListener("touchend", function(){ setTimeout(function(){ tip.style.display="none"; }, 1800); });
+
+show(42);
+</script>
+</body></html>

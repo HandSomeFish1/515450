@@ -1,0 +1,16 @@
+﻿.token
+.token.txt
+__pycache__/
+*.pyc
+*.zip
+_*.py
+_check*.js
+
+# 个人数据，不发布
+report.html
+history.csv
+latest.json
+strategy_2026.csv
+review_2026.csv
+review_all.csv
+review_month.csv

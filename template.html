@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>515450 谷底分 · 每日打分</title>
+<meta name="generator" content="daily_score.py">
+<style>
+  :root{
+    --bg:#080d16; --card:#111a2b; --line:#22304a; --ink:#e7eef9;
+    --muted:#8b9cb6; --dim:#5b6b85; --accent:#38bdf8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:24px 16px 40px;background:var(--bg);color:var(--ink);
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Roboto,sans-serif;
+       font-variant-numeric:tabular-nums}
+  .wrap{max-width:960px;margin:0 auto}
+  h1{font-size:1.32rem;margin:0 0 4px;font-weight:700}
+  h1 .badge{font-size:.66rem;font-weight:500;color:var(--muted);border:1px solid var(--line);
+            border-radius:999px;padding:2px 9px;margin-left:8px;vertical-align:middle}
+  .sub{color:var(--muted);font-size:.8rem;margin-bottom:16px}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0)) var(--card);
+        border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+  .card-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+             margin-bottom:12px;flex-wrap:wrap}
+  .card-head h2{font-size:.95rem;margin:0;font-weight:600}
+  .muted{color:var(--muted)}
+  .top{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .score{font-size:3.4rem;font-weight:800;line-height:1}
+  .score-cap{color:var(--muted);font-size:.78rem;margin-top:6px}
+  .score-cap span{color:var(--dim)}
+  .pill{display:inline-block;margin-left:12px;padding:5px 15px;border-radius:999px;
+        font-size:.85rem;vertical-align:middle;border:1px solid}
+  .hint{color:var(--muted);font-size:.8rem;margin:10px 0 0}
+  .delta{font-size:.74rem;color:var(--muted);margin-left:8px}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-top:16px}
+  .m{background:#0d1522;border:1px solid var(--line);border-radius:10px;padding:9px 13px}
+  .m .k{font-size:.68rem;color:var(--muted);display:block}
+  .m .v{font-size:1.02rem;font-weight:650;margin-top:3px}
+  .bar{height:10px;border-radius:99px;background:#0d1522;overflow:hidden;margin-top:16px;
+       border:1px solid var(--line)}
+  .bar i{display:block;height:100%;border-radius:99px}
+  .bar-labels{display:flex;justify-content:space-between;color:var(--dim);font-size:.7rem;margin-top:6px}
+  .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+  .controls label{font-size:.74rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .controls input[type=date]{background:#0d1522;border:1px solid var(--line);color:var(--ink);
+        border-radius:8px;padding:5px 8px;font-size:.76rem;color-scheme:dark}
+  .btns{display:flex;gap:7px;flex-wrap:wrap}
+  .controls button{background:#0d1522;border:1px solid #2a3a58;color:#b8cbe4;border-radius:999px;
+        padding:5px 13px;font-size:.74rem;cursor:pointer;font-family:inherit}
+  .controls button.on{background:#1d4ed8;border-color:#3b82f6;color:#fff}
+  .controls button:hover{border-color:#3b82f6}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.74rem;color:var(--muted);margin-bottom:8px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+  .chartwrap{position:relative}
+  .chart{width:100%;height:auto;display:block}
+  .vline{position:absolute;top:0;bottom:0;width:1px;background:var(--accent);opacity:.55;
+         display:none;pointer-events:none}
+  .dot{position:absolute;width:9px;height:9px;border-radius:50%;border:2px solid var(--bg);
+       transform:translate(-50%,-50%);display:none;pointer-events:none;
+       box-shadow:0 0 0 1px rgba(255,255,255,.5)}
+  .tip{position:absolute;display:none;pointer-events:none;background:#0b1424;border:1px solid var(--accent);
+       border-radius:8px;padding:6px 10px;font-size:.76rem;line-height:1.5;color:var(--ink);
+       transform:translate(-50%,-115%);white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.5);z-index:5}
+  .tip b{color:#7dd3fc}
+  .note{color:var(--dim);font-size:.74rem;line-height:1.7;margin-top:10px}
+  table{width:100%;border-collapse:collapse;font-size:.82rem}
+  th{color:var(--muted);font-weight:500;font-size:.7rem;text-align:left;padding:0 8px 8px;
+     border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:8px;border-bottom:1px solid rgba(34,48,74,.55);vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  .num{text-align:right}
+  .strong{font-weight:700}
+  .desc{color:var(--muted);font-size:.76rem}
+  .track{display:inline-block;vertical-align:middle;width:84px;height:7px;border-radius:99px;
+         background:#0d1522;overflow:hidden;margin-right:8px;border:1px solid var(--line)}
+  .track i{display:block;height:100%}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+  .stat{background:#0d1522;border:1px solid var(--line);border-radius:10px;padding:10px 13px}
+  .stat .k{color:var(--muted);font-size:.68rem}
+  .stat .v{font-size:1.02rem;font-weight:650;margin-top:3px}
+  .stat .x{color:var(--dim);font-size:.68rem;margin-top:2px}
+  .dca-top{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+  .dca-amt{font-size:2.1rem;font-weight:800;color:var(--accent);line-height:1}
+  .dca-formula{color:var(--muted);font-size:.78rem;margin-top:6px}
+  .dca-metrics{display:grid;grid-template-columns:repeat(2,auto);gap:8px 22px}
+  .dca-metrics .k{display:block;color:var(--muted);font-size:.66rem}
+  .dca-metrics b{font-size:.94rem;font-weight:650}
+  .dca-empty{color:var(--muted);font-size:.82rem}
+  .scrollbox{max-height:190px;overflow-y:auto;border-radius:10px}
+  .scrollbox::-webkit-scrollbar{width:8px}
+  .scrollbox::-webkit-scrollbar-thumb{background:#2a3a58;border-radius:99px}
+  .scrollbox::-webkit-scrollbar-track{background:transparent}
+  .scrollbox thead th{position:sticky;top:0;background:#111a2b;z-index:1}
+  details{color:var(--muted);font-size:.8rem}
+  summary{cursor:pointer;color:var(--muted)}
+  .inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:12px}
+  .inputs label{display:block;font-size:.7rem;color:var(--muted)}
+  .inputs input{width:100%;margin-top:4px;background:#0d1522;border:1px solid var(--line);
+                color:var(--ink);border-radius:8px;padding:6px 8px;font-size:.8rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>515450 红利低波 · 谷底分<span class="badge">每日打分</span></h1>
+  <div class="sub">__DATA_LINE__ · 生成于 __GEN__</div>
+
+  <div class="card">
+    <div class="top">
+      <div>
+        <span class="score" id="score" style="color:__COLOR__">__SCORE__</span>
+        <span class="pill" id="pill" style="color:__COLOR__;background:__BGC__;border-color:__COLOR__">__ACTION__</span>
+        <div class="score-cap">谷底分 <span>/ 100</span>__DELTA__</div>
+      </div>
+      <div class="note" style="margin:0">__DATE__ · 收盘 __PRICE__</div>
+    </div>
+    <p class="hint">__HINT__</p>
+    <div class="bar"><i id="fill" style="width:__SCORE__%;background:__COLOR__"></i></div>
+    <div class="bar-labels"><span>0 顶部</span><span>50 中性</span><span>100 谷底</span></div>
+    <div class="metrics">
+      <div class="m"><div class="k">回撤深度</div><div class="v">__TRO_D__</div></div>
+      <div class="m"><div class="k">三年位置</div><div class="v">__TRO_A__</div></div>
+      <div class="m"><div class="k">利差位置</div><div class="v">__TRO_E__</div></div>
+      <div class="m"><div class="k">20 个交易日前</div><div class="v">__TRO_PREV__</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>谷底分走势</h2>
+      <span class="muted" id="rangeLabel" style="font-size:.72rem"></span>
+    </div>
+    <div class="controls">
+      <label>起 <input type="date" id="dstart"></label>
+      <label>止 <input type="date" id="dend"></label>
+      <button id="apply">应用</button>
+      <span class="btns" id="btns">
+        <button data-n="21">近 1 月</button>
+        <button data-n="42" class="on">近 2 月</button>
+        <button data-n="63">近 3 月</button>
+        <button data-n="126">近半年</button>
+        <button data-n="250">近 1 年</button>
+        <button data-n="0">全部</button>
+      </span>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="chartwrap" id="cwrap">
+      <div id="chart"></div>
+      <div class="vline" id="vline"></div>
+      <div class="dot" id="cdot"></div>
+      <div class="tip" id="tip"></div>
+    </div>
+    <div class="note">线色 = 分数所在区间；纵轴翻转，越往下越接近谷底。
+      分数 = 便宜度在近 750 个交易日里的分位；便宜度 = 0.60×回撤深度 + 0.25×三年位置 + 0.15×利差位置。</div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>今日定投</h2>
+      <span class="muted" style="font-size:.72rem">50 / 100 / 650，深跌加码</span>
+    </div>
+    __DCA_BLOCK__
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>谷底分拆解</h2>
+      <span class="muted" style="font-size:.72rem">折算分越高 ＝ 跌得越深</span>
+    </div>
+    <table>
+      <thead><tr><th>因子</th><th class="num">当前值</th><th>折算分</th><th class="num">权重</th><th class="desc">口径</th></tr></thead>
+      <tbody>
+__ROWS__
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>今天的原始数据</h2></div>
+    <div class="stats">
+      <div class="stat"><div class="k">指数股息率</div><div class="v">__DIV__%</div><div class="x">历史分位 __DIVPCT__%</div></div>
+      <div class="stat"><div class="k">10 年期国债</div><div class="v">__Y10__%</div><div class="x">截至 __Y10_DATE__</div></div>
+      <div class="stat"><div class="k">股息率 − 10Y</div><div class="v">__SPREAD__%</div><div class="x">利差分位 __SPREADPCT__（越低越便宜）</div></div>
+      <div class="stat"><div class="k">指数 PE</div><div class="v">__PE__</div><div class="x">历史分位 __PEPCT__%</div></div>
+      <div class="stat"><div class="k">RSI14</div><div class="v">__RSI__</div><div class="x">515450 日线</div></div>
+      <div class="stat"><div class="k">年线 BIAS</div><div class="v">__MA250_GAP__</div><div class="x">MA250 ＝ __MA250__</div></div>
+      <div class="stat"><div class="k">60 日动量</div><div class="v">__MOM60__</div><div class="x">沪深300 __MOM300__</div></div>
+      <div class="stat"><div class="k">相对强弱 60 日</div><div class="v">__RS60__</div><div class="x">情绪分 __ENV__ / 100</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>打分历史</h2>
+      <span class="muted" style="font-size:.72rem">最近 8 次</span>
+    </div>
+    <div class="scrollbox">
+    <table>
+      <thead>
+        <tr><th>日期</th><th class="num">收盘</th><th class="num">谷底分</th>
+        <th class="num">档位</th><th class="num">回撤</th><th class="num">位置</th></tr>
+      </thead>
+      <tbody>
+__HIST__
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>口径说明</h2></div>
+    <p class="note" style="margin-top:0">区间：__BANDS__</p>
+    <p class="note">谷底分 = 便宜度在过去 750 个交易日里的分位（0–100，越高越接近谷底）。
+      便宜度 = 0.60×回撤深度（距一年高点跌幅 ÷ 15%，封顶 100）+ 0.25×三年位置（价格在近三年区间的位置取反）
+      + 0.15×利差位置（股息率 − 10 年期国债过去三年的分位）。</p>
+    <p class="note">回测（2023-03 ~ 2026-10，875 个交易日）：后 60 日 Spearman +0.43；
+      80–100 档 116 天，后 60 日平均 +7.50%、正收益占比 96%。</p>
+    <p class="note">数据：515450 日线与基金净值（腾讯 / 天天基金）、指数估值（蛋卷，__INDEX__）、
+      10 年期国债（东方财富）。利差分位以近 __PERCENTILE_YEARS__ 年 __N__ 个周度样本排名换算；
+      历史股息率由「当前股息率 × 当前 PE ÷ 历史 PE」估算，假设派息率稳定。</p>
+    <details>
+      <summary>手动改数算一下（不改动上面的自动结果）</summary>
+      <div class="inputs">
+__INPUTS__
+      </div>
+      <p class="note">这是原来网页的计算器，留作对照。</p>
+    </details>
+  </div>
+
+</div>
+
+<script>
+var DATA = __CHART_JSON__;
+var BANDS = [[0,20,"#ef4444","顶部区"],[20,40,"#f97316","偏热"],[40,60,"#94a3b8","中性"],
+             [60,80,"#4ade80","偏冷"],[80,100,"#22c55e","谷底区"]];
+var W=900,H=320,L=44,R=104,T=14,B=30;
+var view = [];
+
+function bandOf(v){ for (var i=0;i<BANDS.length;i++){ var hi=BANDS[i][1]; if (v<hi || (i===BANDS.length-1 && v<=hi)) return BANDS[i]; } return BANDS[4]; }
+
+document.getElementById("legend").innerHTML = BANDS.map(function(b){
+  return '<span><i style="background:'+b[2]+'"></i>'+b[0]+'–'+b[1]+' '+b[3]+'</span>';
+}).join("");
+
+function X(i,n){ return L + i*(W-L-R)/Math.max(1,n-1); }
+function Y(v){ return T + v/100*(H-T-B); }
+
+function draw(d){
+  view = d;
+  var n=d.length, s='<svg viewBox="0 0 '+W+' '+H+'" class="chart" id="svgScore">';
+  BANDS.forEach(function(b){
+    var y1=Y(b[0]), y2=Y(b[1]);
+    s+='<rect x="'+L+'" y="'+y1+'" width="'+(W-L-R)+'" height="'+(y2-y1)+'" fill="'+b[2]+'" opacity=".07"/>';
+    s+='<text x="'+(W-R+6)+'" y="'+((y1+y2)/2+3)+'" fill="'+b[2]+'" font-size="10">'+b[0]+'–'+b[1]+' '+b[3]+'</text>';
+  });
+  for(var v=0;v<=100;v+=20){
+    s+='<line x1="'+L+'" y1="'+Y(v)+'" x2="'+(W-R)+'" y2="'+Y(v)+'" stroke="#22304a"/>';
+    s+='<text x="'+(L-8)+'" y="'+(Y(v)+3)+'" fill="#6b7d98" font-size="10" text-anchor="end">'+v+'</text>';
+  }
+  for(var i=1;i<n;i++){
+    var c=bandOf((d[i-1][2]+d[i][2])/2)[2];
+    s+='<line x1="'+X(i-1,n).toFixed(1)+'" y1="'+Y(d[i-1][2]).toFixed(1)+'" x2="'+X(i,n).toFixed(1)+
+       '" y2="'+Y(d[i][2]).toFixed(1)+'" stroke="'+c+'" stroke-width="2"/>';
+  }
+  var step=Math.max(1,Math.floor(n/8));
+  for(var j=0;j<n;j+=step){
+    s+='<text x="'+X(j,n).toFixed(1)+'" y="'+(H-8)+'" fill="#6b7d98" font-size="10" text-anchor="middle">'+d[j][0].slice(5)+'</text>';
+  }
+  document.getElementById("chart").innerHTML=s+"</svg>";
+}
+
+var startEl=document.getElementById("dstart"), endEl=document.getElementById("dend");
+if (DATA.length){
+  startEl.min=endEl.min=DATA[0][0];
+  startEl.max=endEl.max=DATA[DATA.length-1][0];
+  startEl.value=DATA[Math.max(0,DATA.length-42)][0];
+  endEl.value=DATA[DATA.length-1][0];
+}
+
+function setLabel(d){
+  document.getElementById("rangeLabel").textContent =
+    d[0][0]+" ~ "+d[d.length-1][0]+" · "+d.length+" 个交易日 · 鼠标移上去看当天数值";
+}
+
+function show(n){
+  var sub = n ? DATA.slice(Math.max(0, DATA.length-n)) : DATA.slice();
+  draw(sub); setLabel(sub);
+  startEl.value=sub[0][0]; endEl.value=sub[sub.length-1][0];
+}
+
+function applyRange(){
+  var a=startEl.value, z=endEl.value;
+  if(!a || !z || a>z) return;
+  var d=DATA.filter(function(x){ return x[0]>=a && x[0]<=z; });
+  if(d.length<2) return;
+  draw(d); setLabel(d);
+}
+
+document.getElementById("btns").addEventListener("click", function(e){
+  var t=e.target;
+  if(t.tagName!=="BUTTON") return;
+  Array.prototype.forEach.call(this.children, function(b){ b.classList.remove("on"); });
+  t.classList.add("on");
+  show(parseInt(t.getAttribute("data-n"),10));
+});
+document.getElementById("apply").addEventListener("click", applyRange);
+startEl.addEventListener("change", applyRange);
+endEl.addEventListener("change", applyRange);
+
+var wrap=document.getElementById("cwrap"), vline=document.getElementById("vline"),
+    dotEl=document.getElementById("cdot"), tip=document.getElementById("tip");
+wrap.addEventListener("mousemove", function(e){
+  var d=view; if(!d || d.length<2) return;
+  var r=wrap.getBoundingClientRect(), svgX=(e.clientX-r.left)/r.width*W;
+  if(svgX<L || svgX>W-R){ hide(); return; }
+  var i=Math.max(0,Math.min(d.length-1,Math.round((svgX-L)/(W-L-R)*(d.length-1))));
+  var b=bandOf(d[i][2]);
+  var px=X(i,d.length)/W*100, py=Y(d[i][2])/H*100;
+  vline.style.display="block"; vline.style.left=px+"%";
+  dotEl.style.display="block"; dotEl.style.left=px+"%"; dotEl.style.top=py+"%"; dotEl.style.background=b[2];
+  tip.style.display="block"; tip.style.left=Math.min(88,Math.max(12,px))+"%"; tip.style.top=py+"%";
+  tip.innerHTML="<b>"+d[i][0]+"</b><br>谷底分 "+d[i][2].toFixed(0)+" · "+b[3]+"<br>净值 "+d[i][1].toFixed(3);
+});
+wrap.addEventListener("mouseleave", hide);
+function hide(){ vline.style.display="none"; dotEl.style.display="none"; tip.style.display="none"; }
+
+show(42);
+Array.prototype.forEach.call(document.querySelectorAll('.scrollbox'), function(b){
+  b.scrollTop = b.scrollHeight;
+});
+</script>
+</body>
+</html>

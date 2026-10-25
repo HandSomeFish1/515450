@@ -1,0 +1,74 @@
+{
+  "ticker": "515450",
+  "name": "515450 红利低波",
+  "tencent_code": "sh515450",
+  "index_code": "CSIH30269",
+  "index_name": "中证红利低波动指数",
+  "benchmark_tencent_code": "sh000300",
+  "benchmark_name": "沪深300",
+  "weights": {
+    "spread": 35,
+    "div": 25,
+    "rsi": 20,
+    "bias": 10,
+    "env": 10
+  },
+  "ranges": {
+    "spread_pct": [
+      10,
+      90
+    ],
+    "div_yield": [
+      5.5,
+      3.5
+    ],
+    "rsi": [
+      20,
+      80
+    ],
+    "bias": [
+      -15,
+      15
+    ],
+    "env": [
+      0,
+      100
+    ]
+  },
+  "percentile_years": 10,
+  "sentiment_scale": 2.5,
+  "use_intraday": false,
+  "dca": {
+    "min_amount": 100,
+    "max_amount": 500,
+    "round_to": 10,
+    "flat_amount": 300,
+    "anchor_high_score": 0,
+    "anchor_low_score": 50,
+    "ledger_start": "2026-10-19",
+    "actual_amount": 100,
+    "rule_from": "2026-10-26",
+    "fee_rate": 0.0012,
+    "score_mode": "tiered",
+    "trough_anchor_high": 80,
+    "trough_anchor_low": 50,
+    "tiers": [
+      {
+        "below": 20,
+        "amount": 50
+      },
+      {
+        "below": 75,
+        "amount": 100
+      },
+      {
+        "below": 999,
+        "amount": 650
+      }
+    ],
+    "addon_threshold": 3.0,
+    "addon_per_pp": 880,
+    "addon_from_score": 75
+  },
+  "desktop_copy": "C:\\Users\\xvhai\\Desktop\\515450温度计.html"
+}

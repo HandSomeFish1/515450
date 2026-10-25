@@ -1,0 +1,46 @@
+name: 更新谷底分数据
+
+on:
+  workflow_dispatch:          # 手机上手动点一下就跑
+  schedule:
+    - cron: "24 7 * * 1-5"    # 北京时间 15:24（周一至周五，收盘后）
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 安装依赖
+        run: pip install lxml
+
+      - name: 取数 + 打分
+        run: python daily_score.py --no-copy
+
+      - name: 生成手机版
+        run: python build_mobile.py
+
+      - name: 汇总到 docs/
+        run: |
+          mkdir -p docs
+          cp mobile.html docs/index.html
+          cp review_2026.html docs/review-2026.html
+          cp review_all.html docs/review-all.html
+          cp review_month.html docs/review-month.html
+          cp score3_curve.png docs/curve.png 2>/dev/null || true
+          touch docs/.nojekyll
+
+      - name: 提交
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "自动更新 $(date +'%Y-%m-%d %H:%M')" || echo "没有变化"
+          git push
