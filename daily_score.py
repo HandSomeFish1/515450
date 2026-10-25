@@ -139,6 +139,55 @@ def drop_partial(pairs, force_intraday=False):
     return pairs
 
 
+def fetch_realtime_price(tencent_code):
+    """腾讯实时行情的最新价（盘中用）。"""
+    txt = _http("https://qt.gtimg.cn/q=%s" % tencent_code,
+                referer="https://gu.qq.com/", encoding="gbk")
+    parts = txt.split('"')[1].split("~")
+    price = float(parts[3])
+    if price <= 0:
+        raise RuntimeError("实时价异常")
+    return price
+
+
+def patch_nav_latest(nav_adj, etf, cfg):
+    """基金净值通常 T+1 才公布。若 ETF 已有更新的交易日，
+    就用「ETF 价格 × 净值/价格比率」补上一点，保证当天分数能算出来。
+
+    - 盘中：用腾讯实时价（你点开的那个时刻）
+    - 收盘后：用 ETF 当日收盘价
+    """
+    if not nav_adj or not etf:
+        return nav_adj
+    etf_map = dict(etf)
+    adj_last = nav_adj[-1][0]
+    etf_last = etf[-1][0]
+    if etf_last <= adj_last:
+        return nav_adj
+
+    ref = None
+    for d in reversed([x[0] for x in etf]):
+        if d <= adj_last and d in dict(nav_adj):
+            ref = d
+            break
+    if not ref:
+        return nav_adj
+
+    ratio = dict(nav_adj)[ref] / etf_map[ref]
+    val = None
+    if in_trading_session():
+        try:
+            rt = fetch_realtime_price(cfg["tencent_code"])
+            val = rt * ratio
+            print("     盘中：用实时价 %.3f 补 %s" % (rt, etf_last))
+        except Exception:                     # noqa: BLE001
+            val = None
+    if val is None:
+        val = etf[-1][1] * ratio
+        print("     净值缺 %s，用 ETF 收盘 %.3f 补上（折算 %.4f）" % (etf_last, etf[-1][1], val))
+    return nav_adj + [(etf_last, val)]
+
+
 def load_frames(cfg):
     """一次性抓齐所有数据，供打分和账本共用（避免重复请求、减少等待）。"""
     import dca_core                       # 延迟导入，避免循环依赖
@@ -155,6 +204,7 @@ def load_frames(cfg):
     bond = fetch_cn10y()
     print("  · 取 基金复权净值…", flush=True)
     _, nav_adj = dca_core.fetch_fund_nav(cfg.get("fund_code", "515450"))
+    nav_adj = patch_nav_latest(nav_adj, etf, cfg)
     return {"etf": etf, "bench": bench, "val": val, "pe": pe,
             "bond": bond, "nav_adj": nav_adj}
 
