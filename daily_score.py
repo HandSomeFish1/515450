@@ -199,13 +199,14 @@ def load_frames(cfg):
     intraday = bool(cfg.get("use_intraday", False))
     print("  · 取 515450 日线…", flush=True)
     etf = drop_partial(fetch_kline(cfg["tencent_code"], 900), intraday)
-    try:                                  # 腾讯 K 线偶尔给错收盘价，用实时价校正
-        rt = fetch_realtime_price(cfg["tencent_code"])
-        if etf and rt > 0 and abs(etf[-1][1] / rt - 1) > 0.002:
-            print("     K线收盘 %.3f 异常，改用实时价 %.3f" % (etf[-1][1], rt))
-            etf[-1] = (etf[-1][0], rt)
-    except Exception:                     # noqa: BLE001
-        pass
+    if cfg.get("fix_kline_with_realtime"):
+        try:
+            rt = fetch_realtime_price(cfg["tencent_code"])
+            if etf and rt > 0 and abs(etf[-1][1] / rt - 1) > 0.002:
+                print("     K线收盘 %.3f 异常，改用实时价 %.3f" % (etf[-1][1], rt))
+                etf[-1] = (etf[-1][0], rt)
+        except Exception:                 # noqa: BLE001
+            pass
     print("  · 取 沪深300 日线…", flush=True)
     bench = drop_partial(fetch_kline_range(cfg["benchmark_tencent_code"], "2019-01-01"), intraday)
     print("  · 取 指数估值…", flush=True)
@@ -215,9 +216,11 @@ def load_frames(cfg):
     bond = fetch_cn10y()
     print("  · 取 基金复权净值…", flush=True)
     _, nav_adj = dca_core.fetch_fund_nav(cfg.get("fund_code", "515450"))
+    raw_len = len(nav_adj)
     nav_adj = patch_nav_latest(nav_adj, etf, cfg)
     return {"etf": etf, "bench": bench, "val": val, "pe": pe,
-            "bond": bond, "nav_adj": nav_adj}
+            "bond": bond, "nav_adj": nav_adj,
+            "nav_estimated": len(nav_adj) != raw_len}
 
 
 def fetch_index_valuation(index_code):

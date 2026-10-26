@@ -105,7 +105,7 @@ page = r"""<!DOCTYPE html>
 </style></head><body><div class="wrap">
 
 <h1>515450 红利低波 · 谷底分</h1>
-<div class="sub">__DATE__ · 收盘 __PRICE__</div>
+<div class="sub">__DATE__ · 收盘 __PRICE____EST__</div>
 
 <div class="card">
   <div class="top">
@@ -296,6 +296,7 @@ html = (page.replace("__DATA__", json.dumps(series, ensure_ascii=False, separato
             .replace("__CALC__", json.dumps(calc, ensure_ascii=False, separators=(",", ":")))
             .replace("__DATE__", last["date"])
             .replace("__PRICE__", "%.3f" % last["price"])
+            .replace("__EST__", "（净值未公布，按 ETF 价估算）" if frames.get("nav_estimated") else "")
             .replace("__SCORE__", "%.0f" % score)
             .replace("__BAND__", band_txt)
             .replace("__COLOR__", color)
