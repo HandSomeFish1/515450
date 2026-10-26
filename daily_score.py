@@ -146,8 +146,8 @@ def drop_partial(pairs, force_intraday=False):
 
 def fetch_realtime_price(tencent_code):
     """腾讯实时行情的最新价（盘中用）。"""
-    txt = _http("https://qt.gtimg.cn/q=%s" % tencent_code,
-                referer="https://gu.qq.com/", encoding="gbk")
+    txt = http_get("https://qt.gtimg.cn/q=%s" % tencent_code,
+                   referer="https://gu.qq.com/", encoding="gbk")
     parts = txt.split('"')[1].split("~")
     price = float(parts[3])
     if price <= 0:
@@ -180,13 +180,12 @@ def patch_nav_latest(nav_adj, etf, cfg):
 
     ratio = dict(nav_adj)[ref] / etf_map[ref]
     val = None
-    if in_trading_session():
-        try:
-            rt = fetch_realtime_price(cfg["tencent_code"])
-            val = rt * ratio
-            print("     盘中：用实时价 %.3f 补 %s" % (rt, etf_last))
-        except Exception:                     # noqa: BLE001
-            val = None
+    try:
+        rt = fetch_realtime_price(cfg["tencent_code"])
+        val = rt * ratio
+        print("     用实时价 %.3f 补 %s（净值未公布）" % (rt, etf_last))
+    except Exception:                         # noqa: BLE001
+        val = None
     if val is None:
         val = etf[-1][1] * ratio
         print("     净值缺 %s，用 ETF 收盘 %.3f 补上（折算 %.4f）" % (etf_last, etf[-1][1], val))
@@ -200,6 +199,13 @@ def load_frames(cfg):
     intraday = bool(cfg.get("use_intraday", False))
     print("  · 取 515450 日线…", flush=True)
     etf = drop_partial(fetch_kline(cfg["tencent_code"], 900), intraday)
+    try:                                  # 腾讯 K 线偶尔给错收盘价，用实时价校正
+        rt = fetch_realtime_price(cfg["tencent_code"])
+        if etf and rt > 0 and abs(etf[-1][1] / rt - 1) > 0.002:
+            print("     K线收盘 %.3f 异常，改用实时价 %.3f" % (etf[-1][1], rt))
+            etf[-1] = (etf[-1][0], rt)
+    except Exception:                     # noqa: BLE001
+        pass
     print("  · 取 沪深300 日线…", flush=True)
     bench = drop_partial(fetch_kline_range(cfg["benchmark_tencent_code"], "2019-01-01"), intraday)
     print("  · 取 指数估值…", flush=True)
