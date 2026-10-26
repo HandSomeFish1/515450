@@ -118,9 +118,14 @@ def market_closed_today():
     return now.hour * 60 + now.minute >= 15 * 60 + 5
 
 
+def now_cn():
+    """当前北京时间（不依赖机器时区，GitHub 服务器是 UTC）。"""
+    return dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=8)
+
+
 def in_trading_session(now=None):
     """是否处于 A 股连续竞价时段（9:30–11:30、13:00–15:00，仅限工作日）。"""
-    now = now or dt.datetime.now()
+    now = now or now_cn()
     if now.weekday() >= 5:
         return False
     m = now.hour * 60 + now.minute
@@ -131,7 +136,7 @@ def drop_partial(pairs, force_intraday=False):
     """不在交易时段时，丢掉当天还没走完的 K 线，只用最近一个已收盘交易日；盘中则保留实时价。"""
     if force_intraday:
         return pairs
-    now = dt.datetime.now()
+    now = now_cn()
     today = now.date().isoformat()
     if pairs and pairs[-1][0] == today and now.hour * 60 + now.minute < 15 * 60 \
             and not in_trading_session(now):
